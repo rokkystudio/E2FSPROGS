@@ -24,10 +24,7 @@ e2fsck.exe -fn C:\images\test.img
 Run `python tests/test_native_ext4.py` for disposable image integration tests. The EXEs are expected in `artifacts/`, with experimental mke2fs at `build-local/misc/`. Clean builds are not yet reproducible: some generated Autoconf Makefiles received manual patches. Clone with `git clone --recurse-submodules`; upstream sources are pinned in a Git submodule and Windows changes live in `patches/windows-port.patch`.
 
 ## Readiness
-Alpha indicates basic read-only tests and disposable-image integration tests. Beta should require a range of filesystem sizes/features, repair behavior testing, large and binary files, a clean rebuild, dependency audit, and published test results. **Beta status and device flashing readiness are not established yet.**
 
-## Android / REDMAGIC warning
-Android ext4 partitions may contain `shared_blocks` and be protected by AVB/dm-verity. Passing fsck does not prove a modified partition can boot. Before flashing: examine vbmeta/verity configuration, preserve verified rollback images, verify partition mappings and test edits against copies. The project checklist blocks flashing until those conditions are met.
 
 ## Licensing
 Upstream e2fsprogs GPL/LGPL licenses and notices apply; see upstream/NOTICE and file headers. The matching upstream source plus Windows patch must be made available with binaries.

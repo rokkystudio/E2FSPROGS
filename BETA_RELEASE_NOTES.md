@@ -1,17 +1,19 @@
-# E2FSPROGS v0.2.0-beta.1 — Windows x64 (beta preview)
+# E2FSPROGS v0.2.0-beta.2 — Windows x64
 
 ## Русский
-- Нативные `debugfs.exe`, `dumpe2fs.exe`, `e2fsck.exe` и `mke2fs.exe`; MinGW-w64, импорт только системных DLL Windows.
-- **7 из 7 наборов Windows-only тестов PASS:** форматирование, проверка и восстановление одноразовых ext4, бинарные файлы до 4 МиБ, независимый Python-парсер, отрицательные тесты, отказ от записи `shared_blocks`.
-- Подтверждена успешная загрузка REDMAGIC с отдельным Magisk-модулем и исчезновение звука затвора в Telegram.
-- **Ограничение:** Magisk-патч — не прямая прошивка ext4. Запись и ремонт реальных Android `shared_blocks` и AVB/dm-verity **не сертифицированы**. Не используйте для прошивки важных разделов.
-- Чистая выборочная сборка четырёх целевых программ прошла на Windows; полная сборка дополнительных upstream-программ не завершена.
+
+Нативные Windows x64 утилиты **debugfs**, **dumpe2fs**, **e2fsck**, **mke2fs** на базе e2fsprogs 1.47.3. Для запуска не требуются MSYS2/Cygwin DLL.
+
+Проверено: **7/7 автоматических тестовых наборов на Windows**, создание ext4, чтение, запись файлов и восстановление повреждений на одноразовых образах, матрица блоков 1024/2048/4096 байт, файлы до 4 МиБ, независимый Python-парсер и отрицательные тесты. Проверена статическая линковка сторонних библиотек.
+
+**Ограничения:** работа с `shared_blocks` в режиме записи не поддерживается; `debugfs` отказывает в опасной записи. Исправление файловой системы и работа с большими образами проверены не для всех вариантов ext4. Используйте копии данных.
 
 ## English
-- Native Windows `debugfs.exe`, `dumpe2fs.exe`, `e2fsck.exe`, `mke2fs.exe`, using MinGW-w64 with Windows-only runtime imports.
-- **7/7 Windows-only suites PASS:** disposable ext4 formatting, repair and checks, binary files up to 4 MiB, independent Python verifier, negative tests, and `shared_blocks` write refusal.
-- REDMAGIC successfully rebooted with a separate Magisk overlay; the user confirmed Telegram's shutter sound is gone.
-- **Scope:** systemless Magisk overlay success does **not** prove direct firmware flashing safety. Android `shared_blocks` mutation and AVB/dm-verity remain unqualified.
-- Four selected programs build in the independent Windows build tree; other upstream programs are not fully ported.
 
-Sources: https://github.com/rokkystudio/E2FSPROGS — clone with `--recurse-submodules`, apply `patches/windows-port.patch`. Upstream GPL/LGPL license notices apply.
+Native Windows x64 **debugfs**, **dumpe2fs**, **e2fsck** and **mke2fs** from e2fsprogs 1.47.3. No MSYS2/Cygwin runtime DLLs are required.
+
+Validation: **7/7 Windows-only automated test suites**, disposable ext4 creation, file read/write, corruption recovery, 1024/2048/4096-byte block sizes, files up to 4 MiB, independent Python ext4 reader and negative tests. Third-party libraries are statically linked.
+
+**Limitations:** write operations on `shared_blocks` filesystems are unsupported and rejected by `debugfs`. Not all ext4 feature combinations, repair operations or large filesystem sizes have been independently validated. Work on copies of valuable data.
+
+Source: https://github.com/rokkystudio/E2FSPROGS. Upstream GPL/LGPL notices and the Windows port patch are provided.

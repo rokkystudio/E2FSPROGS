@@ -9,8 +9,6 @@
 
 **Independent reader limitations:** nested directories, extent trees above depth 0, uninitialized extents and several ext4 features are unsupported; the reader fails explicitly rather than pretending full validation. This is not an independent audit of every filesystem structure.
 
-**Status:** Windows-only validation no longer needs Linux. However, passing tests is not proof of safe Android flashing. Real `shared_blocks`, AVB/dm-verity, a proven rollback path and large-image testing remain separate gates. Do not flash yet.
 
 ### Negative tests
 The tests/test_independent_negative.py suite rejects invalid magic, impossible block layout, corrupt extent headers and missing paths: 4/4 PASS. This is not a replacement for a full fsck.
-

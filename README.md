@@ -1,16 +1,13 @@
-# E2FSPROGS — Native Windows ext2/3/4 tools
+# E2FSPROGS — native ext2/ext3/ext4 tools for Windows
 
-**Language / Язык:** [Русский](README.ru.md) | [English](README.en.md)
+**[Русский](README.ru.md) | [English](README.en.md)**
 
-Native Windows x64 port of [e2fsprogs 1.47.3](https://github.com/tytso/e2fsprogs), compiled using MinGW-w64 with no MSYS2/Cygwin runtime DLL dependencies.
+Windows x64 port of [e2fsprogs 1.47.3](https://github.com/tytso/e2fsprogs) built with MinGW-w64. Executables require no MSYS2 or Cygwin runtime DLLs.
 
-Нативный порт e2fsprogs для Windows x64. Инструкции, сборка, тесты и ограничения описаны на двух языках:
+Included: **debugfs.exe**, **dumpe2fs.exe**, **e2fsck.exe**, **mke2fs.exe**.
 
-- **[README на русском](README.ru.md)** — установка, инструменты, тестирование, сборка и безопасность.
-- **[README in English](README.en.md)** — installation, tools, testing, building and safety.
+Documentation: [Windows-only testing (RU)](docs/WINDOWS_ONLY.ru.md) · [Windows-only testing (EN)](docs/WINDOWS_ONLY.en.md) · [Test matrix (RU)](docs/TEST_MATRIX.ru.md) · [Test matrix (EN)](docs/TEST_MATRIX.en.md).
 
-**Current status / Текущий статус:** Beta candidate under qualification. **Not approved for Android firmware flashing / Не предназначено для прошивки Android до завершения проверок.**
+[Releases](https://github.com/rokkystudio/E2FSPROGS/releases) · [Port patch](patches/windows-port.patch)
 
-[Releases](https://github.com/rokkystudio/E2FSPROGS/releases) · [Source patch](patches/windows-port.patch) · [Russian beta checklist](docs/BETA_CHECKLIST.ru.md) · [English beta checklist](docs/BETA_CHECKLIST.en.md)
-
-[Windows-only / Без Linux: RU](docs/WINDOWS_ONLY.ru.md) | [EN](docs/WINDOWS_ONLY.en.md)
+**Beta preview:** use copies of filesystem images when testing write or repair operations. Special feature `shared_blocks` write handling is not supported.

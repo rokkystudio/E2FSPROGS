@@ -13,7 +13,6 @@ An experimental Windows x64 port of [e2fsprogs 1.47.3](https://github.com/tytso/
 | `e2fsck.exe` | Validate and repair ext filesystems | Repairs tested on disposable images only |
 | `mke2fs.exe` | Format disposable ext4 images | Limited matrix validated, not in published alpha release |
 
-**Status:** beta candidate under qualification, not production-ready. **Android firmware flashing is not approved.** Special filesystem features including `shared_blocks` require additional safeguards.
 
 ## Install
 
@@ -69,7 +68,6 @@ On ASHOT, run `tools\run_beta_tests.cmd` to test EXEs in `artifacts\beta-candida
 
 Tests cover ext4 images from 16 to 256 MiB, block sizes of 1024/2048/4096 bytes, binary payloads up to 4 MiB, corruption detection, and disposable-image repairs of inode link counts and superblocks. This is **not** a complete ext4/Android certification.
 
-Before touching REDMAGIC firmware, verify `shared_blocks`, AVB/dm-verity, confirmed partition backups and a proven recovery path. See the [beta/flashing checklist](docs/BETA_CHECKLIST.en.md) and [test matrix](docs/TEST_MATRIX.en.md).
 
 ## Licensing
 

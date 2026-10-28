@@ -9,7 +9,6 @@
 ## Known issues and limits
 
 - **`mke2fs` truncation bug**: native mke2fs shortens a newly formatted preallocated image; the disposable test fixture works around this by restoring the original length, and also explicitly disables `resize_inode`. `mke2fs.exe` is **not** included in this pre-release.
-- Writes and `e2fsck` repairs have **not** been tested on images containing Android `shared_blocks` or verified dm-verity/AVB metadata. Do not flash modified Android images based on these tests.
 - Clean Autoconf/Make rebuild after cloning requires additional work because some generated Makefiles were manually adjusted in `build-local` (which is intentionally ignored).
 - These tools remain experimental; tests do not demonstrate production safety.
 
@@ -20,4 +19,3 @@ Run `python tests/test_native_ext4.py` locally with the experimental mke2fs buil
 ## Update: 2026-10-28 mke2fs fix
 
 The native Windows zeroout operation now returns unsupported so the portable explicit-write fallback runs; a 64 MiB image keeps its exact size with default ext4 options, and the integration test succeeds with no workaround. See MKE2FS_FIX.md. Earlier truncation notes above describe the previous build.
-

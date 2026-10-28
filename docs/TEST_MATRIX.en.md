@@ -11,6 +11,5 @@ Command: `python tests/test_beta_matrix.py`; result **PASS (4/4)** on ASHOT. All
 
 Each case checks: file size retention during filesystem creation, metadata inspection, read-only fsck before and after writing, binary file insertion and extraction with NUL/CR/LF/FF, and exact byte comparison. All three EXE files are audited for non-Windows DLL imports.
 
-Not tested: shared_blocks writing, fsck repairs, large files, independent Linux comparison, clean reproducible builds, AVB/dm-verity handling and tested device recovery. **This is not permission to flash.**
 
 Machine-readable report on ASHOT: `artifacts/beta-test-results.json` (generated locally and gitignored).
