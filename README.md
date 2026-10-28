@@ -18,3 +18,9 @@ The locally built `debugfs.exe`, `e2fsck.exe`, and `dumpe2fs.exe` are native Win
 Clone with `git clone --recurse-submodules`, then apply the port using `git -C upstream apply ../patches/windows-port.patch` before building. The current local `build-local` generated Makefiles were manually patched, so rebuilding from a clean checkout is not yet reproducible.
 
 Source licensing remains as in upstream GPL/LGPL notices. Distributions must make corresponding source and changes available.
+
+## Documentation / Документация
+
+- [Русское руководство](docs/README.ru.md) / [English guide](docs/README.en.md)
+- [Чек-лист бета и прошивки](docs/BETA_CHECKLIST.ru.md) / [Beta and flashing checklist](docs/BETA_CHECKLIST.en.md)
+- [Матрица тестов](docs/TEST_MATRIX.ru.md) / [Test matrix](docs/TEST_MATRIX.en.md)
