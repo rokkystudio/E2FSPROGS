@@ -8,7 +8,7 @@ Status: **NOT READY TO FLASH**. Passing one set of tests does not ensure Android
 - [ ] Filesystem checksums and fsck after writes
 - [ ] Superblock, inode and bitmap corruption detection and repairs on disposable copies only
 - [ ] Size preservation and out-of-bounds write checks
-- [ ] Independent comparison against Linux e2fsprogs on the same fixtures
+- [ ] Independent Windows-only ext4 parsing and content-hash comparison (see WINDOWS_ONLY.en.md)
 - [ ] PE import audit ensuring no non-Windows runtime DLLs
 - [ ] Test ext4 `shared_blocks`: reject unsafe writes or safely unshare blocks
 - [ ] Read actual device AVB/vbmeta and dm-verity configuration without modifying it

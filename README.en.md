@@ -74,3 +74,7 @@ Before touching REDMAGIC firmware, verify `shared_blocks`, AVB/dm-verity, confir
 ## Licensing
 
 Upstream e2fsprogs licensing (GPL/LGPL and individual source notices) remains in effect. See `upstream/NOTICE` and source headers. Binary distributions must provide the corresponding sources and Windows-port patch.
+
+## Windows-only qualification / Квалификация Windows-only
+
+[Windows-only validation](docs/WINDOWS_ONLY.en.md). MSYS2 is used only at build time.
