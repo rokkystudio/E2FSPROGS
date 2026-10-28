@@ -951,6 +951,63 @@ index 8f96eee..ca9cc7c 100644
  #include <stdio.h>
  #ifdef HAVE_STDLIB_H
  #include <stdlib.h>
+diff --git a/lib/ext2fs/windows_io.c b/lib/ext2fs/windows_io.c
+index 4bff074..818eb8f 100644
+--- a/lib/ext2fs/windows_io.c
++++ b/lib/ext2fs/windows_io.c
+@@ -923,49 +923,10 @@ static errcode_t windows_discard(io_channel channel, unsigned long long block,
+ #pragma GCC diagnostic ignored "-Wunused-parameter"
+ #endif
+ static errcode_t windows_zeroout(io_channel channel, unsigned long long block,
+-			      unsigned long long count)
++                                   unsigned long long count)
+ {
+-	struct windows_private_data *data;
+-	int		ret;
+-
+-	EXT2_CHECK_MAGIC(channel, EXT2_ET_MAGIC_IO_CHANNEL);
+-	data = (struct windows_private_data *) channel->private_data;
+-	EXT2_CHECK_MAGIC(data, EXT2_ET_MAGIC_WINDOWS_IO_CHANNEL);
+-
+-	if (channel->flags & CHANNEL_FLAGS_BLOCK_DEVICE) {
+-		/* Not implemented until the BLKZEROOUT mess is fixed */
+-		goto unimplemented;
+-	} else {
+-		/* Regular file, try to use truncate/punch/zero. */
+-		struct stat statbuf;
+-
+-		if (count == 0)
+-			return 0;
+-		/*
+-		 * If we're trying to zero a range past the end of the file,
+-		 * extend the file size, then truncate everything.
+-		 */
+-		ret = fstat(data->dev, &statbuf);
+-		if (ret)
+-			goto err;
+-		if ((unsigned long long) statbuf.st_size <
+-			(block + count) * channel->block_size + data->offset) {
+-			ret = ftruncate(data->dev,
+-					(block + count) * channel->block_size + data->offset);
+-			if (ret)
+-				goto err;
+-		}
+-		goto unimplemented;
+-	}
+-err:
+-	if (ret < 0) {
+-		if (errno == EOPNOTSUPP)
+-			goto unimplemented;
+-		return errno;
+-	}
+-	return 0;
+-unimplemented:
+-	return EXT2_ET_UNIMPLEMENTED;
++    /* Request portable software zeroing; never shrink preallocated files. */
++    return EXT2_ET_UNIMPLEMENTED;
+ }
+ 
+ int ext2fs_open_file(const char *pathname, int flags, mode_t mode)
 diff --git a/lib/ss/help.c b/lib/ss/help.c
 index d3319b6..d9de090 100644
 --- a/lib/ss/help.c

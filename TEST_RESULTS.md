@@ -16,3 +16,8 @@
 ## Reproduction
 
 Run `python tests/test_native_ext4.py` locally with the experimental mke2fs build present at `build-local/misc/mke2fs.exe` and the three executables in `artifacts/`. The test creates disposable files under the project directory and removes them automatically.
+
+## Update: 2026-10-28 mke2fs fix
+
+The native Windows zeroout operation now returns unsupported so the portable explicit-write fallback runs; a 64 MiB image keeps its exact size with default ext4 options, and the integration test succeeds with no workaround. See MKE2FS_FIX.md. Earlier truncation notes above describe the previous build.
+

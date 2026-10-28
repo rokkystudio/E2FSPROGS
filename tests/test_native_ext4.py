@@ -19,12 +19,11 @@ def test():
   tmp=pathlib.Path(t)
   img=tmp/"clean.img"
   with img.open("wb") as f:f.truncate(64*1024*1024)
-  p=cmd([MKE,"-F","-t","ext4","-O","^resize_inode","-E","nodiscard","-b","4096",img],None)
+  p=cmd([MKE,"-F","-t","ext4","-b","4096",img],None)
   if p.returncode: raise AssertionError("mke2fs failed to create disposable image")
   actual_size=img.stat().st_size
   print("MKE2FS_SIZE",actual_size,"EXPECTED",64*1024*1024)
-  if actual_size != 64*1024*1024:
-   with img.open("r+b") as f:f.truncate(64*1024*1024)
+  assert actual_size == 64*1024*1024, "mke2fs unexpectedly changed image length"
   before=sha(img)
   p=cmd([BIN/"e2fsck.exe","-fn",img],{0})
   assert before==sha(img),"read-only fsck changed image!"
