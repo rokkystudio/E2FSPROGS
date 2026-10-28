@@ -1,0 +1,11 @@
+from pathlib import Path
+f=Path(r"C:\FILES\PROJECTS\TOOLS\e2fsprogs-windows\source\debugfs\dump.c")
+s=f.read_text()
+s=s.replace('if (fd != -1)\n\t\ti = fchmod(fd, mode_xlate(inode->i_mode));', '#ifndef _WIN32\n\tif (fd != -1)\n\t\ti = fchmod(fd, mode_xlate(inode->i_mode));')
+s=s.replace('else\n\t\ti = chmod(name, mode_xlate(inode->i_mode));\n\tif (i == -1)', 'else\n#endif\n\t\ti = chmod(name, mode_xlate(inode->i_mode));\n\tif (i == -1)', 1)
+s=s.replace('#ifndef HAVE_FCHOWN\n\ti = chown', '#ifdef _WIN32\n\t/* Win32 has no POSIX uid/gid ownership for native output files. */\n\ti = 0;\n#elif !defined(HAVE_FCHOWN)\n\ti = chown')
+s=s.replace('if (symlink(buf, fullname) == -1) {', '#ifdef _WIN32\n\tcom_err("rdump", 0, "symlink export is unsupported on native Win32: %s", fullname);\n#else\n\tif (symlink(buf, fullname) == -1) {')
+s=s.replace('while creating symlink %s -> %s", buf, fullname);\n\t\tgoto errout;\n\t}', 'while creating symlink %s -> %s", buf, fullname);\n\t\tgoto errout;\n\t}\n#endif')
+s=s.replace('if (name[0] && mkdir(fullname, S_IRWXU) == -1) {', '#ifdef _WIN32\n\t\tif (name[0] && mkdir(fullname) == -1) {\n#else\n\t\tif (name[0] && mkdir(fullname, S_IRWXU) == -1) {\n#endif')
+f.write_text(s)
+print('Win32 file export semantics adjusted; symlink export explicitly unsupported')

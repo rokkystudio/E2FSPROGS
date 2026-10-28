@@ -1,0 +1,11 @@
+from pathlib import Path
+f=Path(r"C:\FILES\PROJECTS\TOOLS\e2fsprogs-windows\source\lib\ss\listen.c")
+t=f.read_text()
+t=t.replace('    sigset_t omask, igmask;', '#ifndef _WIN32\n    sigset_t omask, igmask;\n#endif')
+t=t.replace('    sigemptyset(&igmask);\n    sigaddset(&igmask, SIGINT);\n    sigprocmask(SIG_BLOCK, &igmask, &omask);', '#ifndef _WIN32\n    sigemptyset(&igmask);\n    sigaddset(&igmask, SIGINT);\n    sigprocmask(SIG_BLOCK, &igmask, &omask);\n#endif')
+t=t.replace('    sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);','#ifndef _WIN32\n    sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);\n#endif')
+t=t.replace('sig_cont = signal(SIGCONT, print_prompt);','#ifndef _WIN32\n\tsig_cont = signal(SIGCONT, print_prompt);\n#endif')
+t=t.replace('    sig_cont = signal(SIGCONT, print_prompt);','#ifndef _WIN32\n    sig_cont = signal(SIGCONT, print_prompt);\n#endif')
+t=t.replace('(void) signal(SIGCONT, sig_cont);','#ifndef _WIN32\n\t(void) signal(SIGCONT, sig_cont);\n#endif')
+f.write_text(t)
+print('Win32 signal guards added')

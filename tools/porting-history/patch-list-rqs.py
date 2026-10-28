@@ -1,0 +1,11 @@
+from pathlib import Path
+f=Path(r"C:\FILES\PROJECTS\TOOLS\e2fsprogs-windows\source\lib\ss\list_rqs.c")
+t=f.read_text()
+t=t.replace('#include <sys/wait.h>', '#ifndef _WIN32\n#include <sys/wait.h>\n#endif')
+t=t.replace('    sigset_t omask, igmask;', '#ifndef _WIN32\n    sigset_t omask, igmask;\n#endif')
+t=t.replace('    sigemptyset(&igmask);\n    sigaddset(&igmask, SIGINT);\n    sigprocmask(SIG_BLOCK, &igmask, &omask);','#ifndef _WIN32\n    sigemptyset(&igmask);\n    sigaddset(&igmask, SIGINT);\n    sigprocmask(SIG_BLOCK, &igmask, &omask);\n#endif')
+t=t.replace('    sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);', '#ifndef _WIN32\n    sigprocmask(SIG_SETMASK, &omask, (sigset_t *) 0);\n#endif')
+t=t.replace('#ifndef NO_FORK\n    int waitb;', '#if !defined(NO_FORK) && !defined(_WIN32)\n    int waitb;')
+t=t.replace('#ifndef NO_FORK\n    wait(&waitb);','#if !defined(NO_FORK) && !defined(_WIN32)\n    wait(&waitb);')
+f.write_text(t)
+print('list_rqs portability adjusted')
