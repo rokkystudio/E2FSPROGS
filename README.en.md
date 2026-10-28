@@ -1,54 +1,58 @@
-# E2FSPROGS — Native Windows ext2/ext3/ext4 utilities
+# E2FSPROGS — native ext2/ext3/ext4 utilities for Windows
 
-[Русский](README.ru.md) | [English](README.en.md)
+**[Русский](README.ru.md) | [English](README.en.md)**
 
-An experimental Windows x64 port of [e2fsprogs 1.47.3](https://github.com/tytso/e2fsprogs), built with MinGW-w64. The binaries depend on Windows system DLLs only and do not require an MSYS2/Cygwin runtime to execute.
+This project ports the open-source [e2fsprogs 1.47.3](https://github.com/tytso/e2fsprogs) utilities to native Windows x64 using MinGW-w64. Executables run without MSYS2/Cygwin runtime DLLs.
 
-## Utilities
+## Programs
 
-| Tool | Purpose | Validated scope |
-| --- | --- | --- |
-| `debugfs.exe` | Inspect and extract ext2/3/4 files; modify disposable test images | Read/write binary round-trips |
-| `dumpe2fs.exe` | Read superblock and filesystem metadata | Tested |
-| `e2fsck.exe` | Validate and repair ext filesystems | Repairs tested on disposable images only |
-| `mke2fs.exe` | Format disposable ext4 images | Limited matrix validated, not in published alpha release |
+| Program | Purpose |
+| --- | --- |
+| `debugfs.exe` | Inspect, debug, read and extract files from ext2/ext3/ext4 |
+| `dumpe2fs.exe` | Inspect superblock, block groups and filesystem metadata |
+| `e2fsck.exe` | Check filesystems and repair errors |
+| `mke2fs.exe` | Create ext2/ext3/ext4 filesystems in images |
 
+**Latest version:** [v0.2.0-beta.2](https://github.com/rokkystudio/E2FSPROGS/releases/tag/v0.2.0-beta.2). This is an experimental beta: always test repair and write operations on copies of valuable data. To prevent unsafe changes, `debugfs` refuses write access to ext4 filesystems using `shared_blocks`.
 
-## Install
+## Installation
 
-The published [v0.1.0-alpha.1 archive](https://github.com/rokkystudio/E2FSPROGS/releases/tag/v0.1.0-alpha.1) contains the previous three-tool build. The newer four-tool candidate currently exists only on ASHOT at `artifacts/beta-candidate/`. Do not mix binary revisions.
+Download the Windows x64 ZIP from [GitHub Releases](https://github.com/rokkystudio/E2FSPROGS/releases) and extract it to a dedicated directory. No Unix environment is needed to run the binaries.
 
-## Read-only examples
+## Examples
 
-```bat
-dumpe2fs.exe -h C:\images\test.img
-debugfs.exe -R "stat /path/to/file" C:\images\test.img
-e2fsck.exe -fn C:\images\test.img
+```cmd
+dumpe2fs.exe -h D:\images\sample.img
+debugfs.exe -R "stat /example.txt" D:\images\sample.img
+e2fsck.exe -fn D:\images\sample.img
 ```
 
-`-fn` prevents repairs. Back up original images and verify SHA-256 before experimenting. **Do not use `e2fsck -y` or `debugfs -w` on your only copy.**
+`-fn` checks without applying repairs. Use write or repair commands only on disposable or fully backed-up filesystem images.
 
 ## Repository layout
 
-- `upstream/`: original e2fsprogs pinned as a Git submodule;
-- `patches/windows-port.patch`: native Windows changes;
-- `tools/configure_win32_makefiles.py`: generated Makefile adjustments;
-- `tests/`: disposable-image integration and regression suites;
-- `docs/`: extended documentation and acceptance checklists;
-- `build-clean/`, `build-local/`, `artifacts/`: local gitignored build results.
+- `upstream/` — upstream e2fsprogs source (Git submodule).
+- `patches/windows-port.patch` — native Windows portability changes.
+- `tests/` — integration and regression tests.
+- `tools/` — build configuration and test runners.
+- `docs/` — technical documentation and test reports.
+- `build-clean/`, `build-local/`, `artifacts/` — gitignored local build output.
 
-## Build and test
+## Building on Windows
 
-```bat
+Requires Windows x64, MinGW-w64 GCC, MSYS2 **as a build shell**, and Python.
+
+```cmd
 git clone --recurse-submodules https://github.com/rokkystudio/E2FSPROGS.git
 cd E2FSPROGS
-git -C upstream apply ..\patches\windows-port.patch
+git -C upstream apply ../patches/windows-port.patch
 ```
 
-Building requires MSYS2 **as a build environment**, MinGW-w64 GCC and Python. In the MSYS2 shell:
+In the MSYS2 shell with MinGW-w64 enabled:
 
 ```bash
-mkdir -p build-clean
+export PATH=/mingw64/bin:/usr/bin:$PATH
+mkdir build-clean
 cd build-clean
 ../upstream/configure --build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 --disable-nls --disable-uuidd --disable-tls --disable-tdb --disable-mmp CC=/mingw64/bin/gcc
 python ../tools/configure_win32_makefiles.py .
@@ -60,19 +64,14 @@ make -C misc mke2fs dumpe2fs -j4
 make -C e2fsck -j4
 ```
 
-Only these explicitly selected targets are qualified for compilation; `make -j4` across all upstream programs also attempts to build `tune2fs`, which is not ported yet.
+The unrestricted upstream `make` also builds extra tools that are not yet fully ported.
 
-On ASHOT, run `tools\run_beta_tests.cmd` to test EXEs in `artifacts\beta-candidate`. The test images are disposable and automatically removed.
+## Tests and limitations
 
-## Validation and limitations
+Seven Windows-only automated suites passed, covering disposable ext4 creation, file read/write, binary round-trips, repair of selected corruption cases, multiple block sizes, independent ext4 structural reading and negative cases. The development-machine runner `tools\run_beta_tests.cmd` expects EXEs in `artifacts\beta-candidate\`.
 
-Tests cover ext4 images from 16 to 256 MiB, block sizes of 1024/2048/4096 bytes, binary payloads up to 4 MiB, corruption detection, and disposable-image repairs of inode link counts and superblocks. This is **not** a complete ext4/Android certification.
-
+Not all ext4 features, filesystem sizes and corruption patterns are covered. The independent Python reader is intentionally limited and rejects unsupported formats. See [test matrix](docs/TEST_MATRIX.en.md) and [Windows-only testing](docs/WINDOWS_ONLY.en.md).
 
 ## Licensing
 
-Upstream e2fsprogs licensing (GPL/LGPL and individual source notices) remains in effect. See `upstream/NOTICE` and source headers. Binary distributions must provide the corresponding sources and Windows-port patch.
-
-## Windows-only qualification / Квалификация Windows-only
-
-[Windows-only validation](docs/WINDOWS_ONLY.en.md). MSYS2 is used only at build time.
+Original e2fsprogs GPL/LGPL licenses and copyright notices apply. See `upstream/NOTICE` and source headers. Binary distributions must provide corresponding source and Windows port changes.
