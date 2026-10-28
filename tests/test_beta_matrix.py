@@ -1,10 +1,11 @@
+import os
 """Disposable extended Windows ext4 validation. Never accesses Android backups."""
 from pathlib import Path
 import hashlib, json, os, subprocess, tempfile, time
 ROOT=Path(__file__).resolve().parents[1]
-BIN=ROOT/"artifacts"
-MKE=ROOT/"build-local/misc/mke2fs.exe"
-REPORT=ROOT/"artifacts/beta-test-results.json"
+BIN=Path(os.environ.get("E2FSPROGS_BIN",str(ROOT/"artifacts")))
+MKE=Path(os.environ.get("E2FSPROGS_MKE",str(ROOT/"build-local/misc/mke2fs.exe")))
+REPORT=BIN/"beta-test-results.json"
 def run(args, accepted=(0,), timeout=120):
     p=subprocess.run(list(map(str,args)),capture_output=True,text=True,errors="replace",timeout=timeout)
     if p.returncode not in accepted:

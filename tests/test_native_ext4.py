@@ -1,7 +1,8 @@
+import os
 import hashlib, pathlib, subprocess, tempfile, shutil, sys, re
-ROOT=pathlib.Path(r"C:\FILES\PROJECTS\E2FSPROGS")
-BIN=ROOT/"artifacts"
-MKE=ROOT/"build-local"/"misc"/"mke2fs.exe"
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+BIN=pathlib.Path(os.environ.get("E2FSPROGS_BIN",str(ROOT/"artifacts")))
+MKE=pathlib.Path(os.environ.get("E2FSPROGS_MKE",str(ROOT/"build-local"/"misc"/"mke2fs.exe")))
 def cmd(args,expected=None):
  p=subprocess.run([str(x) for x in args],capture_output=True,text=True,errors="replace",timeout=35)
  print("RUN:", " ".join(str(x) for x in args[:3]), "| code",p.returncode)

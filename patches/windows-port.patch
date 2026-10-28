@@ -1,17 +1,59 @@
 diff --git a/debugfs/debugfs.c b/debugfs/debugfs.c
-index b9f248b..c086996 100644
+index b9f248b..a46989c 100644
 --- a/debugfs/debugfs.c
 +++ b/debugfs/debugfs.c
-@@ -144,7 +144,7 @@ static void open_filesystem(char *device, int open_flags, blk64_t superblock,
+@@ -144,7 +144,49 @@ static void open_filesystem(char *device, int open_flags, blk64_t superblock,
  {
  	int	retval;
  	io_channel data_io = 0;
 -	io_manager io_ptr = unix_io_manager;
 +	io_manager io_ptr = default_io_manager;
++
++#ifdef _WIN32
++    /*
++     * Android ext4 images may have deduplicated shared blocks.
++     * This native preview does not unshare them. Fail closed BEFORE
++     * opening the image for writing; never rely on EXT2_FLAG_FORCE.
++     */
++    if (open_flags & EXT2_FLAG_RW) {
++        unsigned char sb[104];
++        unsigned int ro_compat;
++        FILE *image;
++        if (superblock != 0 || data_filename != NULL) {
++            fprintf(stderr, "Windows debugfs: refusing nonstandard write-mode ext4 image\n");
++            current_fs = NULL;
++            return;
++        }
++        image = fopen(device, "rb");
++        if (!image || fseek(image, 1024, SEEK_SET) != 0 ||
++            fread(sb, 1, sizeof(sb), image) != sizeof(sb)) {
++            if (image)
++                fclose(image);
++            fprintf(stderr, "Windows debugfs: cannot inspect ext4 image safely, refusing write\n");
++            current_fs = NULL;
++            return;
++        }
++        fclose(image);
++        if (sb[56] != 0x53 || sb[57] != 0xEF) {
++            fprintf(stderr, "Windows debugfs: unverified ext4 magic, refusing write\n");
++            current_fs = NULL;
++            return;
++        }
++        ro_compat = (unsigned int)sb[100] |
++            ((unsigned int)sb[101] << 8) |
++            ((unsigned int)sb[102] << 16) |
++            ((unsigned int)sb[103] << 24);
++        if (ro_compat & EXT4_FEATURE_RO_COMPAT_SHARED_BLOCKS) {
++            fprintf(stderr, "Windows debugfs: shared_blocks ext4 detected; refusing unsafe write\n");
++            current_fs = NULL;
++            return;
++        }
++    }
++#endif
  
  	if (superblock != 0 && blocksize == 0) {
  		com_err(device, 0, "if you specify the superblock, you must also specify the block size");
-@@ -159,7 +159,7 @@ static void open_filesystem(char *device, int open_flags, blk64_t superblock,
+@@ -159,7 +201,7 @@ static void open_filesystem(char *device, int open_flags, blk64_t superblock,
  			current_fs = NULL;
  			return;
  		}
@@ -20,7 +62,7 @@ index b9f248b..c086996 100644
  		if (retval) {
  			com_err(data_filename, 0, "while opening data source");
  			current_fs = NULL;
-@@ -390,7 +390,7 @@ void do_init_filesys(int argc, ss_argv_t argv, int sci_idx EXT2FS_ATTR((unused))
+@@ -390,7 +432,7 @@ void do_init_filesys(int argc, ss_argv_t argv, int sci_idx EXT2FS_ATTR((unused))
  		return;
  	ext2fs_blocks_count_set(&param, blocks);
  	retval = ext2fs_initialize(argv[1], 0, &param,
@@ -29,7 +71,7 @@ index b9f248b..c086996 100644
  	if (retval) {
  		com_err(argv[1], retval, "while initializing filesystem");
  		current_fs = NULL;
-@@ -1818,7 +1818,12 @@ void do_mknod(int argc, ss_argv_t argv, int sci_idx EXT2FS_ATTR((unused)),
+@@ -1818,7 +1860,12 @@ void do_mknod(int argc, ss_argv_t argv, int sci_idx EXT2FS_ATTR((unused)),
  	if (argc != nr)
  		goto usage;
  
@@ -840,6 +882,38 @@ index 409a78a..bb06947 100644
  #ifdef HAVE_PRCTL
  	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
  		return NULL;
+diff --git a/lib/ext2fs/getsize.c b/lib/ext2fs/getsize.c
+index a028634..6892d30 100644
+--- a/lib/ext2fs/getsize.c
++++ b/lib/ext2fs/getsize.c
+@@ -63,7 +63,7 @@
+ #include "ext2_fs.h"
+ #include "ext2fs.h"
+ 
+-#if defined(__CYGWIN__) || defined (WIN32)
++#if defined(__CYGWIN__) || defined (WIN32) || defined(_WIN32)
+ #include "windows.h"
+ #include "winioctl.h"
+ 
+@@ -85,6 +85,18 @@ errcode_t ext2fs_get_device_size2(const char *file, int blocksize,
+ 	DWORD filesize;
+ #endif /* HAVE_GET_FILE_SIZE_EX */
+ 
++	/* A mounted image may already be open with exclusive sharing.
++	 * Query the ordinary file length without opening another handle. */
++	{
++		WIN32_FILE_ATTRIBUTE_DATA attrs;
++		if (GetFileAttributesExA(file, GetFileExInfoStandard, &attrs) &&
++		    !(attrs.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
++		    !(attrs.dwFileAttributes & FILE_ATTRIBUTE_DEVICE)) {
++			unsigned long long size = ((unsigned long long)attrs.nFileSizeHigh << 32) | attrs.nFileSizeLow;
++			*retblocks = size / (unsigned int)blocksize;
++			return 0;
++		}
++	}
+ 	fd = ext2fs_open_file(file, O_RDONLY, 0);
+ 	if (fd < 0)
+ 		return errno;
 diff --git a/lib/ext2fs/jfs_compat.h b/lib/ext2fs/jfs_compat.h
 index 30b0582..ee96bdd 100644
 --- a/lib/ext2fs/jfs_compat.h
@@ -1280,13 +1354,13 @@ index 2f02886..8eafec5 100644
  
  /*
 diff --git a/misc/create_inode.c b/misc/create_inode.c
-index 624efc0..6d6c71b 100644
+index 624efc0..3132a2d 100644
 --- a/misc/create_inode.c
 +++ b/misc/create_inode.c
-@@ -12,6 +12,18 @@
- #define _LARGEFILE64_SOURCE     1
+@@ -13,6 +13,21 @@
  #define _GNU_SOURCE		1
  
+ #include "config.h"
 +#ifdef _WIN32
 +#define WIN32_LEAN_AND_MEAN
 +#include <windows.h>
@@ -1297,12 +1371,15 @@ index 624efc0..6d6c71b 100644
 +#endif
 +/* Windows reparse points are not treated as ordinary files. */
 +static int win32_lstat_file(const char *path, struct stat *st);
++#ifdef lstat
++#undef lstat
++#endif
 +#define lstat win32_lstat_file
 +#endif
- #include "config.h"
  #include <time.h>
  #include <sys/stat.h>
-@@ -44,6 +56,20 @@
+ #include <sys/types.h>
+@@ -44,6 +59,20 @@
  #include "support/nls-enable.h"
  
  #include "create_inode_libarchive.h"

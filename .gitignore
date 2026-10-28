@@ -22,3 +22,6 @@ __pycache__/
 *.pem
 *.key
 *.pfx
+
+/build-clean/
+
